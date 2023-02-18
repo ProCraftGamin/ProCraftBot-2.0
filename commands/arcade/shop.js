@@ -92,7 +92,16 @@ module.exports = {
 										await interaction.followUp({ content: 'I don\'t know how you got this message cause it shouldn\'t be possible, but you don\'t have enough points to purchase this! ||*maybe use an unscrambler like signal and do some words?*||', ephemeral: true });
 										execute();
 									} else {
-										
+										embed = new EmbedBuilder()
+											.setColor('Blue')
+											.setTitle('Send what you would like to send to my Wii!')
+											.setDescription('• *Please remember to keep your message within server and stream rules* \n• *All messages will be reviewed by moderators before being sent*\n• *No points will be removed until your request is accepted by moderators*');
+
+										try {
+											await interaction.user.send({ embeds: [embed] });
+										} catch (error) {
+											
+										}
 									}
 
 									break;

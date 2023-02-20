@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getBal, removeBal } = require('../../data/arcade utils');
+const { getBal } = require('../../data/arcade utils');
+const { moderatorChannel } = require('../../config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -98,9 +99,77 @@ module.exports = {
 											.setDescription('• *Please remember to keep your message within server and stream rules* \n• *All messages will be reviewed by moderators before being sent*\n• *No points will be removed until your request is accepted by moderators*');
 
 										try {
-											await interaction.user.send({ embeds: [embed] });
+											await interaction.user.send({ embeds: [embed] }).then(dm => {
+												const mFilter = (f) => f.user.id == interaction.user.id;
+												const mCollector = dm.channel.createMessageCollector({ mFilter, time: 900000 });
+
+												embed = new EmbedBuilder()
+													.setColor('DarkRed')
+													.setTitle('Please check your DM\'s to continue!'),
+
+												interaction.editReply({ embeds: [embed], components: [] });
+
+												mCollector.on('collect', c3 => {
+													embed = new EmbedBuilder()
+														.setColor('DarkGreen')
+														.setAuthor({ name: `${interaction.user.username} has requested to send "${c3.content} to ProCraftGamin's Wii`, iconURL: interaction.user.avatarURL() });
+
+													row = new ActionRowBuilder()
+														.addComponents(
+															new ButtonBuilder()
+																.setCustomId(`m|msg|a|${interaction.user.id}|${c3.content}`)
+																.setStyle(ButtonStyle.Success)
+																.setLabel('Approve'),
+														)
+														.addComponents(
+															new ButtonBuilder()
+																.setCustomId(`m|msg|d|${interaction.user.id}|${c3.content}`)
+																.setStyle(ButtonStyle.Danger)
+																.setLabel('Deny'),
+														);
+													interaction.client.channels.cache.get(moderatorChannel).send({ embeds: [embed], components: [row] });
+
+													embed = new EmbedBuilder()
+														.setColor('Blue')
+														.setTitle('Your request has been sent to moderators. It may take an hour or two for it to be reviewed.');
+
+													dm.channel.send({ embeds: [embed] });
+													mCollector.stop();
+												});
+											});
 										} catch (error) {
-											
+											await interaction.channel.send({ embeds: [embed] }).then(m2 => {
+												const mFilter = (f) => f.user.id == interaction.user.id;
+												const mCollector = m2.channel.createMessageCollector({ mFilter, time: 900000 });
+
+												mCollector.on('collect', c3 => {
+													embed = new EmbedBuilder()
+														.setColor('DarkGreen')
+														.setAuthor({ name: `${interaction.user.username} has requested to send "${c3.content} to ProCraftGamin's Wii`, iconURL: interaction.user.avatarURL() });
+
+													row = new ActionRowBuilder()
+														.addComponents(
+															new ButtonBuilder()
+																.setCustomId(`m|msg|a|${interaction.user.id}|${c3.content}`)
+																.setStyle(ButtonStyle.Success)
+																.setLabel('Approve'),
+														)
+														.addComponents(
+															new ButtonBuilder()
+																.setCustomId(`m|msg|d|${interaction.user.id}|${c3.content}`)
+																.setStyle(ButtonStyle.Danger)
+																.setLabel('Deny'),
+														);
+													interaction.client.channels.cache.get(moderatorChannel).send({ embed: embed, components: [row] });
+													c3.delete;
+
+													embed = new EmbedBuilder()
+														.setColor('Blue')
+														.setTitle('Your request has been sent to moderators. It may take an hour or two for it to be reviewed.');
+
+													c3.channel.send({ embeds: embed });
+												});
+											});
 										}
 									}
 

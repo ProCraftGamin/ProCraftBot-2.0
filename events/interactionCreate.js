@@ -136,13 +136,25 @@ module.exports = {
 						if (buttonIdSplit[2] == 'a') {
 							const returnEmbed = new EmbedBuilder()
 								.setColor('DarkGreen')
-								.setTitle(`Moderators have approved your request to send ${buttonIdSplit[4]} to Pro's Wii! It should be sent within the next 24 hours.`);
-							await gm.user.send({ embeds: [returnEmbed] });
+								.setTitle(`Moderators have approved your request to send "${buttonIdSplit[4]}" to Pro's Wii! It should be sent within the next 24 hours.`);
+							try {
+								await gm.user.send({ embeds: [returnEmbed] });
+							} catch (error) {
+								console.error(error);
+							}
 							removeBal(gm.id, 1000);
 							sendToWii(buttonIdSplit[4], gm.user);
-
-							break;
+						} else {
+							const returnEmbed = new EmbedBuilder()
+								.setColor('DarkRed')
+								.setTitle(`Moderators have denied your request to send "${buttonIdSplit[4]}" to Pro's Wii.`);
+							try {
+								await gm.user.send({ embeds: [returnEmbed] });
+							} catch (error) {
+								console.error(error);
+							}
 						}
+						break;
 					}
 
 				default:

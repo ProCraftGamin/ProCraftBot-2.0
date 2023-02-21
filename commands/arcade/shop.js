@@ -112,7 +112,7 @@ module.exports = {
 												mCollector.on('collect', c3 => {
 													embed = new EmbedBuilder()
 														.setColor('DarkGreen')
-														.setAuthor({ name: `${interaction.user.username} has requested to send "${c3.content} to ProCraftGamin's Wii`, iconURL: interaction.user.avatarURL() });
+														.setAuthor({ name: `${interaction.user.username} has requested to send "${c3.content}" to ProCraftGamin's Wii`, iconURL: interaction.user.avatarURL() });
 
 													row = new ActionRowBuilder()
 														.addComponents(
@@ -135,17 +135,18 @@ module.exports = {
 
 													dm.channel.send({ embeds: [embed] });
 													mCollector.stop();
+													interaction.deleteReply();
 												});
 											});
 										} catch (error) {
-											await interaction.channel.send({ embeds: [embed] }).then(m2 => {
+											await interaction.editReply({ embeds: [embed], components: [] }).then(m2 => {
 												const mFilter = (f) => f.user.id == interaction.user.id;
 												const mCollector = m2.channel.createMessageCollector({ mFilter, time: 900000 });
 
 												mCollector.on('collect', c3 => {
 													embed = new EmbedBuilder()
 														.setColor('DarkGreen')
-														.setAuthor({ name: `${interaction.user.username} has requested to send "${c3.content} to ProCraftGamin's Wii`, iconURL: interaction.user.avatarURL() });
+														.setAuthor({ name: `${interaction.user.username} has requested to send "${c3.content}" to ProCraftGamin's Wii`, iconURL: interaction.user.avatarURL() });
 
 													row = new ActionRowBuilder()
 														.addComponents(
@@ -160,14 +161,16 @@ module.exports = {
 																.setStyle(ButtonStyle.Danger)
 																.setLabel('Deny'),
 														);
-													interaction.client.channels.cache.get(moderatorChannel).send({ embed: embed, components: [row] });
-													c3.delete;
+													interaction.client.channels.cache.get(moderatorChannel).send({ embeds: [embed], components: [row] });
+													c3.delete();
 
 													embed = new EmbedBuilder()
 														.setColor('Blue')
-														.setTitle('Your request has been sent to moderators. It may take an hour or two for it to be reviewed.');
+														.setTitle('Your request has been sent to moderators.');
 
-													c3.channel.send({ embeds: embed });
+													mCollector.stop();
+													interaction.deleteReply();
+													interaction.followUp({ embeds: [embed], ephemeral: true });
 												});
 											});
 										}

@@ -2,11 +2,9 @@ const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('test')
+		.setName('test2')
 		.setDescription('-'),
 	async execute(interaction) {
-		const temp = await interaction.guild.scheduledEvents.fetch();
-		console.log(temp == null);
-		console.log(temp.first());
+		await interaction.reply(interaction.guild.scheduledEvents);
 	},
 };
